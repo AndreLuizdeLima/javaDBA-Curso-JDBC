@@ -1,5 +1,6 @@
 import dto.DB;
 import exception.DbException;
+import exception.DbIntegrityException;
 
 import java.io.IOException;
 import java.sql.*;
@@ -16,10 +17,16 @@ public class Main {
 
         //selectExemple();
 
-        insertExemple();
+        //insertExemple();
+
+        //updateExemple();
+
+        //deleteExample();
+
+        transactionExample();
     }
 
-    public static void selectExemple(){
+    public static void selectExample(){
 
         Connection conn = null;
         Statement st = null;
@@ -46,7 +53,7 @@ public class Main {
 
     }
 
-    public static void insertExemple(){
+    public static void insertExample(){
 
         Connection conn = null;
         PreparedStatement st = null;
@@ -88,6 +95,92 @@ public class Main {
         }
 
 
+    }
+
+    public static void updateExample(){
+
+        Connection conn = null;
+        PreparedStatement st = null;
+        try{
+
+            conn = DB.getConnetion();
+            st = conn.prepareStatement("UPDATE seller SET BaseSalary = BaseSalary + ? WHERE (DepartmentId = ?)");
+
+            st.setDouble(1, 200.0);
+            st.setInt(2, 2);
+
+            int rowsAffected = st.executeUpdate();
+
+            System.out.println("Done! Rows affected: " + rowsAffected);
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DB.closeStatement(st);
+            DB.closeConnection();
+        }
+
+
+
+    }
+
+    public static void deleteExample(){
+        Connection conn = null;
+        PreparedStatement st = null;
+        try{
+
+            conn = DB.getConnetion();
+            st = conn.prepareStatement("DELETE FROM department WHERE Id = ?");
+
+            st.setInt(1, 2);
+
+            int rowsAffected = st.executeUpdate();
+
+            System.out.println("Done! Rows affected: " + rowsAffected);
+
+
+        } catch (SQLException e) {
+            throw new DbIntegrityException(e.getMessage());
+        } finally {
+            DB.closeStatement(st);
+            DB.closeConnection();
+        }
+    }
+
+    public static void transactionExample(){
+        Connection conn = null;
+        Statement st = null;
+        try{
+            conn = DB.getConnetion();
+            conn.setAutoCommit(false);
+            st = conn.createStatement();
+
+            int rows1 = st.executeUpdate("UPDATE seller SET BaseSalary = 2090 WHERE DepartmentId = 1");
+
+
+            if (false){
+                throw new SQLException("Fake error");
+            }
+
+            int rows2 = st.executeUpdate("UPDATE seller SET BaseSalary = 3090 WHERE DepartmentId = 2");
+
+            conn.commit();
+
+            System.out.println("rows1 " + rows1);
+            System.out.println("rows2 " + rows2);
+
+        } catch (SQLException e) {
+            try {
+                conn.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            } catch (SQLException e1) {
+                throw new DbException("Error trying to rollback! Caused by: " + e1.getMessage());
+            }
+        } finally {
+            DB.closeStatement(st);
+            DB.closeConnection();
+        }
     }
 
 
