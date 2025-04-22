@@ -1,4 +1,4 @@
-package exception;
+package db;
 
 public class DbIntegrityException extends RuntimeException {
     public DbIntegrityException(String message) {

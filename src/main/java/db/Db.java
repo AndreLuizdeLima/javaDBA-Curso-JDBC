@@ -1,14 +1,11 @@
-package dto;
+package db;
 
-import exception.DbException;
-
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
 import java.util.Properties;
 
-public class DB {
+public class Db {
 
     private static Connection conn = null;
 
@@ -59,7 +56,7 @@ public class DB {
     }
 
     private static Properties loadProperties(){
-        try(InputStream fs =  DB.class.getClassLoader().getResourceAsStream("db.properties")){
+        try(InputStream fs =  Db.class.getClassLoader().getResourceAsStream("db.properties")){
             Properties props = new Properties();
             props.load(fs);
             return props;
@@ -67,5 +64,18 @@ public class DB {
             throw new DbException(e.getMessage());
         }
 
+    }
+
+    public static class DbException extends RuntimeException {
+
+        public DbException(String message) {
+            super(message);
+        }
+    }
+
+    public static class DbIntegrityException extends RuntimeException {
+        public DbIntegrityException(String message) {
+            super(message);
+        }
     }
 }
