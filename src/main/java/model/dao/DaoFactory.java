@@ -10,8 +10,8 @@ public class DaoFactory {
         return new SellerDaoJDBC(Db.getConnetion());
     }
 
-    public DepartmentDao createDepartmentDao(){
-        return new DepartmentDaoJDBC();
+    public static DepartmentDao createDepartmentDao(){
+        return new DepartmentDaoJDBC(Db.getConnetion());
     }
 
 }

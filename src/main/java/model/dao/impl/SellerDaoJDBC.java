@@ -6,12 +6,10 @@ import model.dao.SellerDao;
 import model.entities.Department;
 import model.entities.Seller;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SellerDaoJDBC implements SellerDao {
@@ -79,6 +77,41 @@ public class SellerDaoJDBC implements SellerDao {
 
     @Override
     public List<Seller> findAll() {
-        return List.of();
+
+        PreparedStatement st = null;
+        ResultSet rs = null;
+
+        List<Seller> sellerList = new ArrayList<>();
+        try {
+
+            st = conn.prepareStatement("select seller.*, department.Name as DepName from seller " +
+                    "inner join department on seller.DepartmentId = department.Id");
+
+            rs = st.executeQuery();
+
+            while(rs.next()){
+                Department dep = new Department();
+                dep.setId(rs.getInt("DepartmentId"));
+                dep.setName(rs.getString("DepName"));
+                Seller sell = new Seller();
+                sell.setId(rs.getInt("Id"));
+                sell.setName(rs.getString("Name"));
+                sell.setEmail(rs.getString("Email"));
+                sell.setBirthDate(rs.getDate("BirthDate").toLocalDate());
+                sell.setBaseSalary(rs.getDouble("BaseSalary"));
+                sell.setDepartment(dep);
+
+                sellerList.add(sell);
+            }
+
+            return sellerList;
+
+        } catch (SQLException e){
+            throw new DbException(e.getMessage());
+        } finally {
+            Db.closeResultSte(rs);
+            Db.closeStatement(st);
+        }
+
     }
 }
